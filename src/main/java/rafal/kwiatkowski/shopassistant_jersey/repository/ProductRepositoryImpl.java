@@ -6,7 +6,9 @@ import rafal.kwiatkowski.shopassistant_jersey.model.Product;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import java.util.List;
+
 @Transactional
 @Repository
 public class ProductRepositoryImpl implements ProductRepository {
@@ -27,13 +29,17 @@ public class ProductRepositoryImpl implements ProductRepository {
 
     @Override
     public Product save(Product product) {
-        entityManager.persist(product);
+        entityManager.merge(product);
         return product;
     }
 
     @Override
-    public Product update(Product product) {
-        return null;
+    public Product update(Integer id, Product productWithChanges) {
+        Product product = findOne(id);
+        product.setName(productWithChanges.getName());
+        product.setQuantity(productWithChanges.getQuantity());
+        product.setUnitPrice(productWithChanges.getUnitPrice());
+        return save(product);
     }
 
     @Override
@@ -43,6 +49,8 @@ public class ProductRepositoryImpl implements ProductRepository {
 
     @Override
     public void deleteAll() {
-
+        String hql = "delete FROM Product";
+        Query query = entityManager.createQuery(hql);
+        query.executeUpdate();
     }
 }
